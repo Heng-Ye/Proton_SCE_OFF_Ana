@@ -102,3 +102,12 @@ double pid_2=10.;
 
 //Mean         3.99025e+00   5.67304e-02   5.11613e-06  -2.13497e-05
 //Sigma        1.39141e+00   5.97052e-02   6.70322e-06  -5.50969e-03
+//
+
+//beam XY parameters 
+
+double meanX_mc=-29.15;
+double rmsX_mc=4.246;
+double meanY_mc=421.7;
+double rmsY_mc=3.683;
+

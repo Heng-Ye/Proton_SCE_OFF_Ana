@@ -43,9 +43,9 @@
 #include <fstream>
 #include <string>
 
-//#include "./cali/dedx_function_35ms.h"
+#include "./cali/dedx_function_35ms.h"
 #include "./headers/BasicParameters.h"
-//#include "./headers/BasicFunctions.h"
+#include "./headers/BasicFunctions.h"
 #include "./headers/util.h"
 //#include "./headers/SliceParams.h"
 //#include "./headers/ThinSlice.h"
@@ -105,7 +105,7 @@ void ProtonOnlyTrackLength::Loop() {
 	//TH2D *bx_by_RecoMidP=new TH2D("bx_by_RecoMidP","", n_bx, bx_min, bx_max, n_by, by_min, by_max);
 
 	TH1D *h1d_ntrklen_BQ=new TH1D(Form("h1d_ntrklen_BQ"), Form(""), 140,0,1.4);
-	TH1D *h1d_pid_BQ=new TH1D(Form("h1d_pid_BQ"), Form(""), 500,0,100);
+	TH1D *h1d_pid_BQ=new TH1D(Form("h1d_pid_BQ"), Form(""), 5000, 0, 1000);
 
 
 	//------------------------------------------------------------------------------------------------------------//
@@ -287,10 +287,11 @@ void ProtonOnlyTrackLength::Loop() {
 		double kereco_range=0;
 		double kereco_range2=0;
 		vector<double> EDept;
+
 		double pid=-99;
+		vector<double> trkdedx;
+		vector<double> trkres;
 		if (IsCaloSize) { //if calo size not empty
-		  vector<double> trkdedx;
-		  vector<double> trkres;
 		  for (size_t h=0; h<primtrk_dedx->size(); ++h) { //loop over reco hits of a given track
 			double hitx_reco=primtrk_hitx->at(h);
 			double hity_reco=primtrk_hity->at(h);
@@ -309,7 +310,7 @@ void ProtonOnlyTrackLength::Loop() {
 			}
 
 			double cali_dedx=0.;
-			//cali_dedx=dedx_function_35ms(dqdx, hitx_reco, hity_reco, hitz_reco);
+			cali_dedx=dedx_function_35ms(dqdx, hitx_reco, hity_reco, hitz_reco);
 			//EDept.push_back(cali_dedx*pitch);
 
 			if (h==1) range_reco=0;
@@ -330,32 +331,48 @@ void ProtonOnlyTrackLength::Loop() {
 		  } //loop over reco hits of a given track
 		  //range_reco=primtrk_range->at(0);
 
+                  //std::reverse(trkdedx.begin(),trkdedx.end());
+                  //std::reverse(trkres.begin(),trkres.end());
 		  pid=chi2pid(trkdedx,trkres); //pid using stopping proton hypothesis
+		  //cout<<"pid="<<pid<<endl;
 		} //if calo size not empty
 
 
 		//Reco stopping/Inel p cut
 		bool IsRecoStop=false;
 		bool IsRecoInEL=false;
+		bool IsRecoEL=false;
 		double mom_beam_spec=-99; mom_beam_spec=beamMomentum_spec->at(0);
 		double bx_spec=beamPosx_spec->at(0);
 		double by_spec=beamPosy_spec->at(0);
 
+		//mc p0
+		double btrk_px=-99; btrk_px=beamtrk_Px->at(0);
+		double btrk_py=-99; btrk_py=beamtrk_Py->at(0);
+		double btrk_pz=-99; btrk_pz=beamtrk_Pz->at(0);
+		double btrk_p=sqrt(btrk_px*btrk_px+btrk_py*btrk_py+btrk_pz*btrk_pz);
+		double mom_beam=btrk_p; //GeV/c
+		double mom_beam_MeV=1000.*mom_beam;
+
+		//beam XY cut to remove E-loss events upstream
+		bool IsBeamXY=false;
+		if ((pow(((bx_spec-meanX_mc)/(1.5*rmsX_mc)),2)+pow(((by_spec-meanY_mc)/(1.5*rmsY_mc)),2))<=1.) IsBeamXY=true;
+
+
 		//double range_reco=-99; if (!primtrk_range->empty()) range_reco=primtrk_range->at(0); //reco primary trklen
 		double csda_val_spec=csda_range_vs_mom_sm->Eval(mom_beam_spec);
 
-		//if ((range_reco/csda_val_spec)>=min_norm_trklen_csda&&(range_reco/csda_val_spec)<max_norm_trklen_csda) IsRecoStop=true;
+		if ((range_reco/csda_val_spec)>=min_norm_trklen_csda&&(range_reco/csda_val_spec)<max_norm_trklen_csda) IsRecoStop=true;
 		//if ((range_reco/csda_val_spec)<min_norm_trklen_csda) IsRecoInEL=true;
 
 		//if ((range_reco/csda_val_spec)<min_norm_trklen_csda) { //inel region
-			//if (pid>pid_1) IsRecoInEL=true; 
+		//if (pid>pid_1) IsRecoInEL=true; 
 			//if (pid<=pid_1) IsRecoStop=true; 
 		//} //inel region
 		//if ((range_reco/csda_val_spec)>=min_norm_trklen_csda&&(range_reco/csda_val_spec)<max_norm_trklen_csda) { //stopping p region
-			//if (pid>pid_2) IsRecoInEL=true; 
-			//if (pid<=pid_2) IsRecoStop=true;
+		if (pid>pid_2) IsRecoInEL=true; 
+		if (pid<=pid_2) IsRecoEL=true;
 		//} //stopping p region
-
 
 		//kinetic energies
 		//double ke_beam_spec=p2ke(mom_beam_spec); //ke_beam_spec [GeV]
@@ -425,10 +442,11 @@ void ProtonOnlyTrackLength::Loop() {
 			Fill1DHist(h1d_cosine_Pos, cosine_beam_spec_primtrk);
 		} //Pos
 
-		if (IsBQ&&IsPos&&IsPandoraSlice&&IsCaloSize) { //BQ
+		if (IsBeamXY&&IsBQ&&IsPos&&IsPandoraSlice&&IsCaloSize) { //BQ
 			Fill1DHist(h1d_trklen_BQ, range_reco);
 			bx_by_RecoAll->Fill(bx_spec, by_spec);
 			h1d_ntrklen_BQ->Fill(range_reco/csda_val_spec);
+			//cout<<"pid="<<pid<<endl;
 			h1d_pid_BQ->Fill(pid);
 		} //BQ
 	} //main entry loop
