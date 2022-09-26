@@ -50,6 +50,8 @@
 //#include "./headers/SliceParams.h"
 //#include "./headers/ThinSlice.h"
 //#include "./headers/sce_map.h"
+#include "./headers/BetheBloch.h"
+
 
 using namespace std;
 using namespace ROOT::Math;
@@ -107,6 +109,15 @@ void ProtonOnlyTrackLength::Loop() {
 	TH1D *h1d_ntrklen_BQ=new TH1D(Form("h1d_ntrklen_BQ"), Form(""), 140,0,1.4);
 	TH1D *h1d_pid_BQ=new TH1D(Form("h1d_pid_BQ"), Form(""), 5000, 0, 1000);
 
+	//2D histograms for KEff study
+	TH2D *h2d_trklen_keffit_el=new TH2D("h2d_trklen_keffit_el","", n_b, b_min, b_max, ny_edept, ymin_edept, ymax_edept);
+	TH2D *h2d_trklen_keffit_inel=new TH2D("h2d_trklen_keffit_inel","", n_b, b_min, b_max, ny_edept, ymin_edept, ymax_edept);
+	TH2D *h2d_trklen_keffit_misidp=new TH2D("h2d_trklen_keffit_misidp","", n_b, b_min, b_max, ny_edept, ymin_edept, ymax_edept);
+
+	//Basic configure ------//
+	BetheBloch BB;
+	BB.SetPdgCode(pdg);
+	//----------------------//
 
 	//------------------------------------------------------------------------------------------------------------//
 	for (Long64_t jentry=0; jentry<nentries;jentry++) { //main entry loop
@@ -381,6 +392,23 @@ void ProtonOnlyTrackLength::Loop() {
 		//double ke_trklen_MeV=1000.*ke_trklen; //[unit: MeV]
 		//double ke_calo_MeV=0;
 
+
+		//hypothetical length -------------------------------------------------------------------------------------//
+		double fitted_length=-1; 
+		double tmp_fitted_length=BB.Fit_dEdx_Residual_Length(trkdedx, trkres, pdg, false);
+		//double tmp_fitted_length=BB.Fit_Proton_Residual_Length_Likelihood(trkdedx, trkres, pdg, false);
+		if (tmp_fitted_length>0) fitted_length=tmp_fitted_length;
+		double fitted_KE=-50; 
+		if (fitted_length>0) fitted_KE=BB.KEFromRangeSpline(fitted_length);
+		double ke_ffbeam_MeV=fitted_KE;
+		double min_chi2=BB.Best_Chi2;
+		double kefit_minus_keff=fitted_KE-ke_ff;
+
+
+
+
+
+
 		//Get true trklen ---------------------------------------------------------------------------------------//
 		double range_true=-999;
 		int key_st = 0;
@@ -448,6 +476,18 @@ void ProtonOnlyTrackLength::Loop() {
 			h1d_ntrklen_BQ->Fill(range_reco/csda_val_spec);
 			//cout<<"pid="<<pid<<endl;
 			h1d_pid_BQ->Fill(pid);
+
+			if (kel) { 
+				h2d_trklen_keffit_el->Fill(range_reco, ke_ffbeam_MeV);
+			}
+			if (kinel) { 
+				h2d_trklen_keffit_inel->Fill(range_reco, ke_ffbeam_MeV);
+			}
+			if (kMIDp) {
+				h2d_trklen_keffit_misidp->Fill(range_reco, ke_ffbeam_MeV);
+			}
+
+
 		} //BQ
 	} //main entry loop
 
@@ -471,6 +511,9 @@ void ProtonOnlyTrackLength::Loop() {
  		h1d_ntrklen_BQ->Write();
 		h1d_pid_BQ->Write();
 
+		h2d_trklen_keffit_el->Write();
+		h2d_trklen_keffit_inel->Write();
+		h2d_trklen_keffit_misidp->Write();
 
 /*
 		h1d_trklen_CaloSz_inel->Write();
