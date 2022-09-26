@@ -110,6 +110,9 @@ void ProtonOnlyTrackLength::Loop() {
 	TH1D *h1d_pid_BQ=new TH1D(Form("h1d_pid_BQ"), Form(""), 5000, 0, 1000);
 
 	//2D histograms for KEff study
+	int ny_edept=450;
+	double ymin_edept=-100;
+	double ymax_edept=800;
 	TH2D *h2d_trklen_keffit_el=new TH2D("h2d_trklen_keffit_el","", n_b, b_min, b_max, ny_edept, ymin_edept, ymax_edept);
 	TH2D *h2d_trklen_keffit_inel=new TH2D("h2d_trklen_keffit_inel","", n_b, b_min, b_max, ny_edept, ymin_edept, ymax_edept);
 	TH2D *h2d_trklen_keffit_misidp=new TH2D("h2d_trklen_keffit_misidp","", n_b, b_min, b_max, ny_edept, ymin_edept, ymax_edept);
