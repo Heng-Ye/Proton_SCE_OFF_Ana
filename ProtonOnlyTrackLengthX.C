@@ -117,6 +117,54 @@ void ProtonOnlyTrackLength::Loop() {
 	TH2D *h2d_trklen_keffit_inel=new TH2D("h2d_trklen_keffit_inel","", n_b, b_min, b_max, ny_edept, ymin_edept, ymax_edept);
 	TH2D *h2d_trklen_keffit_misidp=new TH2D("h2d_trklen_keffit_misidp","", n_b, b_min, b_max, ny_edept, ymin_edept, ymax_edept);
 
+        TH2D *h2d_trklen_chi2_el=new TH2D("h2d_trklen_chi2_el","", n_b, b_min, b_max, 1020, -2, 100);
+        TH2D *h2d_trklen_chi2_inel=new TH2D("h2d_trklen_chi2_inel","", n_b, b_min, b_max, 1020, -2, 100);
+        TH2D *h2d_trklen_chi2_misidp=new TH2D("h2d_trklen_chi2_misidp","", n_b, b_min, b_max, 1020, -2, 100);
+
+        TH2D *h2d_trklen_dkeff_el=new TH2D("h2d_trklen_dkeff_el","", n_b, b_min, b_max, 1600, -800,800);
+        TH2D *h2d_trklen_dkeff_inel=new TH2D("h2d_trklen_dkeff_inel","", n_b, b_min, b_max, 1600, -800,800);
+        TH2D *h2d_trklen_dkeff_misidp=new TH2D("h2d_trklen_dkeff_misidp","", n_b, b_min, b_max, 1600, -800,800);
+
+	//keff
+	TH1D *h1d_keff_inel=new TH1D("h1d_keff_inel","",ny_edept,ymin_edept,ymax_edept);
+	TH1D *h1d_keff_inel_inel=new TH1D("h1d_keff_inel_inel","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_keff_inel_el=new TH1D("h1d_keff_inel_el","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_keff_inel_midcosmic=new TH1D("h1d_keff_inel_midcosmic","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_keff_inel_midpi=new TH1D("h1d_keff_inel_midpi","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_keff_inel_midp=new TH1D("h1d_keff_inel_midp","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_keff_inel_midmu=new TH1D("h1d_keff_inel_midmu","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_keff_inel_mideg=new TH1D("h1d_keff_inel_mideg","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_keff_inel_midother=new TH1D("h1d_keff_inel_midother","",ny_edept,ymin_edept,ymax_edept); 
+	h1d_keff_inel->Sumw2();
+	h1d_keff_inel_inel->Sumw2();
+	h1d_keff_inel_el->Sumw2();
+	h1d_keff_inel_midcosmic->Sumw2();
+	h1d_keff_inel_midpi->Sumw2();
+	h1d_keff_inel_midp->Sumw2();
+	h1d_keff_inel_midmu->Sumw2();
+	h1d_keff_inel_mideg->Sumw2();
+	h1d_keff_inel_midother->Sumw2();
+
+	//kehy
+	TH1D *h1d_kehy_inel=new TH1D("h1d_kehy_inel","",ny_edept,ymin_edept,ymax_edept);
+	TH1D *h1d_kehy_inel_inel=new TH1D("h1d_kehy_inel_inel","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_kehy_inel_el=new TH1D("h1d_kehy_inel_el","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_kehy_inel_midcosmic=new TH1D("h1d_kehy_inel_midcosmic","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_kehy_inel_midpi=new TH1D("h1d_kehy_inel_midpi","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_kehy_inel_midp=new TH1D("h1d_kehy_inel_midp","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_kehy_inel_midmu=new TH1D("h1d_kehy_inel_midmu","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_kehy_inel_mideg=new TH1D("h1d_kehy_inel_mideg","",ny_edept,ymin_edept,ymax_edept); 
+	TH1D *h1d_kehy_inel_midother=new TH1D("h1d_kehy_inel_midother","",ny_edept,ymin_edept,ymax_edept); 
+	h1d_kehy_inel->Sumw2();
+	h1d_kehy_inel_inel->Sumw2();
+	h1d_kehy_inel_el->Sumw2();
+	h1d_kehy_inel_midcosmic->Sumw2();
+	h1d_kehy_inel_midpi->Sumw2();
+	h1d_kehy_inel_midp->Sumw2();
+	h1d_kehy_inel_midmu->Sumw2();
+	h1d_kehy_inel_mideg->Sumw2();
+	h1d_kehy_inel_midother->Sumw2();
+
 	//Basic configure ------//
 	BetheBloch BB;
 	BB.SetPdgCode(pdg);
@@ -230,7 +278,6 @@ void ProtonOnlyTrackLength::Loop() {
 				reco_sty=primtrk_hity->at(primtrk_dedx->size()-1);
 				reco_stz=primtrk_hitz->at(primtrk_dedx->size()-1);
 			}
-
 
 			double beam_dx=(reco_stx-mean_StartX)/sigma_StartX;
 			double beam_dy=(reco_sty-mean_StartY)/sigma_StartY;
@@ -372,7 +419,6 @@ void ProtonOnlyTrackLength::Loop() {
 		bool IsBeamXY=false;
 		if ((pow(((bx_spec-meanX_mc)/(1.5*rmsX_mc)),2)+pow(((by_spec-meanY_mc)/(1.5*rmsY_mc)),2))<=1.) IsBeamXY=true;
 
-
 		//double range_reco=-99; if (!primtrk_range->empty()) range_reco=primtrk_range->at(0); //reco primary trklen
 		double csda_val_spec=csda_range_vs_mom_sm->Eval(mom_beam_spec);
 
@@ -395,7 +441,6 @@ void ProtonOnlyTrackLength::Loop() {
 		//double ke_trklen_MeV=1000.*ke_trklen; //[unit: MeV]
 		//double ke_calo_MeV=0;
 
-
 		//hypothetical length -------------------------------------------------------------------------------------//
 		double fitted_length=-1; 
 		double tmp_fitted_length=BB.Fit_dEdx_Residual_Length(trkdedx, trkres, pdg, false);
@@ -406,11 +451,6 @@ void ProtonOnlyTrackLength::Loop() {
 		double ke_ffbeam_MeV=fitted_KE;
 		double min_chi2=BB.Best_Chi2;
 		double kefit_minus_keff=fitted_KE-ke_ff;
-
-
-
-
-
 
 		//Get true trklen ---------------------------------------------------------------------------------------//
 		double range_true=-999;
@@ -438,9 +478,6 @@ void ProtonOnlyTrackLength::Loop() {
 			true_trklen_accum[iz] = range_true;
 		}
 
-
-
-
 		if (IsPandoraSlice&&IsCaloSize) { //calosz cut
 			//before bmrw
 			Fill1DHist(h1d_trklen_CaloSz, range_reco);
@@ -448,7 +485,6 @@ void ProtonOnlyTrackLength::Loop() {
 			Fill1DHist(h1d_stz_CaloSz, reco_stz);
 			Fill1DHist(h1d_sty_CaloSz, reco_sty);
 			Fill1DHist(h1d_stx_CaloSz, reco_stx);
-
 
 
 /*
@@ -482,15 +518,59 @@ void ProtonOnlyTrackLength::Loop() {
 
 			if (kel) { 
 				h2d_trklen_keffit_el->Fill(range_reco, ke_ffbeam_MeV);
+				h2d_trklen_chi2_el->Fill(range_reco, min_chi2);
+				h2d_trklen_dkeff_el->Fill(range_reco, kefit_minus_keff);
 			}
 			if (kinel) { 
 				h2d_trklen_keffit_inel->Fill(range_reco, ke_ffbeam_MeV);
+				h2d_trklen_chi2_inel->Fill(range_reco, min_chi2);
+				h2d_trklen_dkeff_inel->Fill(range_reco, kefit_minus_keff);
 			}
 			if (kMIDp) {
 				h2d_trklen_keffit_misidp->Fill(range_reco, ke_ffbeam_MeV);
+				h2d_trklen_chi2_misidp->Fill(range_reco, min_chi2);
+				h2d_trklen_dkeff_misidp->Fill(range_reco, kefit_minus_keff);
 			}
 
+			if (IsRecoInEL) { //reco inel
+				Fill1DHist(h1d_keff_inel, ke_ff);
+				Fill1DHist(h1d_kehy_inel, fitted_KE);
 
+				if (kinel) { //inel
+					Fill1DHist(h1d_keff_inel_inel, ke_ff);
+					Fill1DHist(h1d_kehy_inel_inel, fitted_KE);
+				} //inel
+				if (kel) { //el 
+					Fill1DHist(h1d_keff_inel_el, ke_ff);
+					Fill1DHist(h1d_kehy_inel_el, fitted_KE);
+				} //el
+				if (kMIDp) { //misidp
+					Fill1DHist(h1d_keff_inel_midp, ke_ff);
+					Fill1DHist(h1d_kehy_inel_midp, fitted_KE);
+				} //misidp
+				if (kMIDpi) { //misidpi
+					Fill1DHist(h1d_keff_inel_midpi, ke_ff);
+					Fill1DHist(h1d_kehy_inel_midpi, fitted_KE);
+				} //misidpi
+				if (kMIDcosmic) {
+					Fill1DHist(h1d_keff_inel_midcosmic, ke_ff);
+					Fill1DHist(h1d_kehy_inel_midcosmic, fitted_KE);
+				}
+				if (kMIDmu) {
+					Fill1DHist(h1d_keff_inel_midmu, ke_ff);
+					Fill1DHist(h1d_kehy_inel_midmu, fitted_KE);
+				}
+				if (kMIDeg) {
+					Fill1DHist(h1d_keff_inel_mideg, ke_ff);
+					Fill1DHist(h1d_kehy_inel_mideg, fitted_KE);
+				}
+				if (kMIDother) {
+					Fill1DHist(h1d_keff_inel_midother, ke_ff);
+					Fill1DHist(h1d_kehy_inel_midother, fitted_KE);
+				}
+
+
+			} //reco inel
 		} //BQ
 	} //main entry loop
 
@@ -529,6 +609,33 @@ void ProtonOnlyTrackLength::Loop() {
 		h1d_trklen_CaloSz_midother->Write();
 */
 
+
+		h1d_keff_inel->Write();
+		h1d_keff_inel_inel->Write();
+		h1d_keff_inel_el->Write();
+		h1d_keff_inel_midp->Write();
+		h1d_keff_inel_midpi->Write();
+		h1d_keff_inel_midcosmic->Write();
+		h1d_keff_inel_midmu->Write();
+		h1d_keff_inel_mideg->Write();
+		h1d_keff_inel_midother->Write();
+
+		h1d_kehy_inel->Write();
+		h1d_kehy_inel_inel->Write();
+		h1d_kehy_inel_midp->Write();
+		h1d_kehy_inel_midpi->Write();
+		h1d_kehy_inel_midcosmic->Write();
+		h1d_kehy_inel_midmu->Write();
+		h1d_kehy_inel_mideg->Write();
+		h1d_kehy_inel_midother->Write();
+
+		h2d_trklen_chi2_el->Write();
+		h2d_trklen_chi2_inel->Write();
+		h2d_trklen_chi2_misidp->Write();
+
+		h2d_trklen_dkeff_el->Write();
+		h2d_trklen_dkeff_inel->Write();
+		h2d_trklen_dkeff_misidp->Write();
 	fout->Close();
 
 
