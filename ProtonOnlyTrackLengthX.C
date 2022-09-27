@@ -165,6 +165,30 @@ void ProtonOnlyTrackLength::Loop() {
 	h1d_kehy_inel_mideg->Sumw2();
 	h1d_kehy_inel_midother->Sumw2();
 
+	//E-loss scan --------------------------------------------------------------------------------------------------//
+	//Calo, hyper/range
+	const int n_eloss=40;
+	vector<double> Eloss_hy;
+
+	TH1D *h1d_KEend_hy_tune_bmrw[n_eloss];
+	TH1D *h1d_KEend_hy_stop_tune_bmrw[n_eloss];
+	TH1D *h1d_KEend_hy_el_tune_bmrw[n_eloss];
+
+	double Eloss_hy_start=15.;
+	double dEloss=0.5;
+	for (int k=0; k<n_eloss; ++k) {
+		//for hy/range
+		double eloss_hy_step=Eloss_hy_start+(double)k*dEloss;
+		Eloss_hy.push_back(eloss_hy_step);
+
+		h1d_KEend_hy_tune_bmrw[k]=new TH1D(Form("h1d_KEend_hy_tune_bmrw_%d",k),"", nke, kemin, kemax);
+		h1d_KEend_hy_stop_tune_bmrw[k]=new TH1D(Form("h1d_KEend_hy_stop_tune_bmrw_%d",k),"", nke, kemin, kemax);
+		h1d_KEend_hy_el_tune_bmrw[k]=new TH1D(Form("h1d_KEend_hy_el_tune_bmrw_%d",k),"", nke, kemin, kemax);
+
+	}
+
+
+
 	//Basic configure ------//
 	BetheBloch BB;
 	BB.SetPdgCode(pdg);
@@ -435,8 +459,8 @@ void ProtonOnlyTrackLength::Loop() {
 		//} //stopping p region
 
 		//kinetic energies
-		//double ke_beam_spec=p2ke(mom_beam_spec); //ke_beam_spec [GeV]
-		//double ke_beam_spec_MeV=1000.*ke_beam_spec; //ke_beam_spec [MeV]
+		double ke_beam_spec=p2ke(mom_beam_spec); //ke_beam_spec [GeV]
+		double ke_beam_spec_MeV=1000.*ke_beam_spec; //ke_beam_spec [MeV]
 		//double ke_trklen=ke_vs_csda_range_sm->Eval(range_reco); //[unit: GeV]
 		//double ke_trklen_MeV=1000.*ke_trklen; //[unit: MeV]
 		//double ke_calo_MeV=0;
@@ -571,6 +595,24 @@ void ProtonOnlyTrackLength::Loop() {
 
 
 			} //reco inel
+
+
+			for (int k=0; k<n_eloss; ++k) {
+				h1d_KEend_hy_tune_bmrw[k]->Fill(ke_beam_spec_MeV-Eloss_hy.at(k)-fitted_KE);
+				if (IsRecoStop) {
+					h1d_KEend_hy_stop_tune_bmrw[k]->Fill(ke_beam_spec_MeV-Eloss_hy.at(k)-fitted_KE);
+				}
+				if (IsRecoEL) { //IsRecoEL
+					h1d_KEend_hy_el_tune_bmrw[k]->Fill(ke_beam_spec_MeV-Eloss_hy.at(k)-fitted_KE);
+				} //IsRecoEL
+			}
+
+
+
+
+
+
+
 		} //BQ
 	} //main entry loop
 
@@ -636,6 +678,13 @@ void ProtonOnlyTrackLength::Loop() {
 		h2d_trklen_dkeff_el->Write();
 		h2d_trklen_dkeff_inel->Write();
 		h2d_trklen_dkeff_misidp->Write();
+
+		for (int k=0; k<n_eloss; ++k) {
+			h1d_KEend_hy_tune_bmrw[k]->Write();
+			h1d_KEend_hy_stop_tune_bmrw[k]->Write();
+			h1d_KEend_hy_el_tune_bmrw[k]->Write();
+		}
+
 	fout->Close();
 
 
