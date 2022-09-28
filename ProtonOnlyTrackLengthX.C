@@ -167,14 +167,18 @@ void ProtonOnlyTrackLength::Loop() {
 
 	//E-loss scan --------------------------------------------------------------------------------------------------//
 	//Calo, hyper/range
-	const int n_eloss=40;
+	int nke=160;
+	double kemin=-800;
+	double kemax=800;
+
+	const int n_eloss=80;
 	vector<double> Eloss_hy;
 
 	TH1D *h1d_KEend_hy_tune_bmrw[n_eloss];
 	TH1D *h1d_KEend_hy_stop_tune_bmrw[n_eloss];
 	TH1D *h1d_KEend_hy_el_tune_bmrw[n_eloss];
 
-	double Eloss_hy_start=15.;
+	double Eloss_hy_start=0.;
 	double dEloss=0.5;
 	for (int k=0; k<n_eloss; ++k) {
 		//for hy/range
