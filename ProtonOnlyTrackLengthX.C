@@ -171,6 +171,7 @@ void ProtonOnlyTrackLength::Loop() {
 	double kemin=-800;
 	double kemax=800;
 
+/*
 	const int n_eloss=80;
 	vector<double> Eloss_hy;
 
@@ -190,7 +191,40 @@ void ProtonOnlyTrackLength::Loop() {
 		h1d_KEend_hy_el_tune_bmrw[k]=new TH1D(Form("h1d_KEend_hy_el_tune_bmrw_%d",k),"", nke, kemin, kemax);
 
 	}
+*/
 
+	//KE-related histograms -------------------------------------------------------------------------------------------//
+
+	TH1D *h1d_kend_calo_el=new TH1D("h1d_kend_calo_el","", ny_edept, ymin_edept, ymax_edept);
+	TH1D *h1d_kend_calo_inel=new TH1D("h1d_kend_calo_inel","", ny_edept, ymin_edept, ymax_edept);
+
+	TH1D *h1d_kend_bb_el=new TH1D("h1d_kend_bb_el","", ny_edept, ymin_edept, ymax_edept);
+	TH1D *h1d_kend_bb_inel=new TH1D("h1d_kend_bb_inel","", ny_edept, ymin_edept, ymax_edept);
+
+	TH1D *h1d_kend_bbtruth_el=new TH1D("h1d_kend_bbtruth_el","", ny_edept, ymin_edept, ymax_edept);
+	TH1D *h1d_kend_bbtruth_inel=new TH1D("h1d_kend_bbtruth_inel","", ny_edept, ymin_edept, ymax_edept);
+
+	TH1D *h1d_kend_true_el=new TH1D("h1d_kend_true_el","", ny_edept, ymin_edept, ymax_edept);
+	TH1D *h1d_kend_true_inel=new TH1D("h1d_kend_true_inel","", ny_edept, ymin_edept, ymax_edept);
+
+	h1d_kend_calo_el->Sumw2();
+	h1d_kend_calo_inel->Sumw2();
+
+	h1d_kend_bb_el->Sumw2();
+	h1d_kend_bb_inel->Sumw2();
+
+	h1d_kend_bbtruth_el->Sumw2();
+	h1d_kend_bbtruth_inel->Sumw2();
+
+	h1d_kend_true_el->Sumw2();
+	h1d_kend_true_inel->Sumw2();
+
+	//const E-loss using stopping protons ---------
+	double Eloss_mc_hy_stop=14.6099/0.997703;
+	//p[0]:14.6099
+	//err_p[0]:0.139049
+	//p[1]:-0.997703
+	//err_p[1]:0.0080038
 
 
 	//Basic configure ------//
@@ -372,7 +406,6 @@ void ProtonOnlyTrackLength::Loop() {
 		double range_reco=-999;
 		vector<double> reco_trklen_accum;
   		reco_trklen_accum.reserve(primtrk_hitz->size());
-		double kereco_calo=0;
 		double kereco_range=0;
 		double kereco_range2=0;
 		vector<double> EDept;
@@ -380,6 +413,7 @@ void ProtonOnlyTrackLength::Loop() {
 		double pid=-99;
 		vector<double> trkdedx;
 		vector<double> trkres;
+		double ke_calo_MeV=0;
 		if (IsCaloSize) { //if calo size not empty
 		  for (size_t h=0; h<primtrk_dedx->size(); ++h) { //loop over reco hits of a given track
 			double hitx_reco=primtrk_hitx->at(h);
@@ -410,7 +444,7 @@ void ProtonOnlyTrackLength::Loop() {
 					reco_trklen_accum[h] = range_reco;
 			}
 
-			kereco_calo+=cali_dedx*pitch;
+			ke_calo_MeV+=cali_dedx*pitch;
 			//kereco_range+=pitch*dedx_predict(resrange_reco);
 			//kereco_range2+=pitch*(double)gr_predict_dedx_resrange->Eval(resrange_reco);
 
@@ -476,9 +510,15 @@ void ProtonOnlyTrackLength::Loop() {
 		if (tmp_fitted_length>0) fitted_length=tmp_fitted_length;
 		double fitted_KE=-50; 
 		if (fitted_length>0) fitted_KE=BB.KEFromRangeSpline(fitted_length);
-		double ke_ffbeam_MeV=fitted_KE;
+		//double ke_ffbeam_MeV=fitted_KE;
+		double ke_ffbeam_MeV=ke_beam_spec_MeV-Eloss_mc_hy_stop;
 		double min_chi2=BB.Best_Chi2;
 		double kefit_minus_keff=fitted_KE-ke_ff;
+
+		double kecalo=-9999.; kecalo=ke_ffbeam_MeV-ke_calo_MeV;
+		double kend=-9999.; kend=1000.*(beamtrk_Eng->at(-2+beamtrk_Eng->size()));
+		double kebb=-9999.; kebb=BB.KEAtLength(ke_ffbeam_MeV, range_reco);
+
 
 		//Get true trklen ---------------------------------------------------------------------------------------//
 		double range_true=-999;
@@ -513,8 +553,6 @@ void ProtonOnlyTrackLength::Loop() {
 			Fill1DHist(h1d_stz_CaloSz, reco_stz);
 			Fill1DHist(h1d_sty_CaloSz, reco_sty);
 			Fill1DHist(h1d_stx_CaloSz, reco_stx);
-
-
 /*
 			Fill1DHist(h1d_truetrklen_CaloSz, range_true);
 			Fill1DHist(h1d_trueendz_CaloSz, true_endz);
@@ -528,7 +566,6 @@ void ProtonOnlyTrackLength::Loop() {
 			if (kMIDeg) Fill1DHist(h1d_trklen_CaloSz_mideg, range_reco);
 			if (kMIDother) Fill1DHist(h1d_trklen_CaloSz_midother, range_reco);
 */
-
 		} //calosz cut
 
 
@@ -563,6 +600,10 @@ void ProtonOnlyTrackLength::Loop() {
 			if (IsRecoInEL) { //reco inel
 				Fill1DHist(h1d_keff_inel, ke_ff);
 				Fill1DHist(h1d_kehy_inel, fitted_KE);
+
+				Fill1DHist(h1d_kend_calo_inel, kecalo);
+				Fill1DHist(h1d_kend_true_inel, kend);
+				Fill1DHist(h1d_kend_bb_inel, kebb);
 
 				if (kinel) { //inel
 					Fill1DHist(h1d_keff_inel_inel, ke_ff);
@@ -599,8 +640,13 @@ void ProtonOnlyTrackLength::Loop() {
 
 
 			} //reco inel
+			if (IsRecoEL) { //reco el
+				Fill1DHist(h1d_kend_calo_el, kecalo);
+				Fill1DHist(h1d_kend_true_el, kend);
+				Fill1DHist(h1d_kend_bb_el, kebb);
+			} //reco el
 
-
+/*
 			for (int k=0; k<n_eloss; ++k) {
 				h1d_KEend_hy_tune_bmrw[k]->Fill(ke_beam_spec_MeV-Eloss_hy.at(k)-fitted_KE);
 				if (IsRecoStop) {
@@ -610,7 +656,7 @@ void ProtonOnlyTrackLength::Loop() {
 					h1d_KEend_hy_el_tune_bmrw[k]->Fill(ke_beam_spec_MeV-Eloss_hy.at(k)-fitted_KE);
 				} //IsRecoEL
 			}
-
+*/
 
 
 
@@ -622,7 +668,9 @@ void ProtonOnlyTrackLength::Loop() {
 
 	//save results ---------------------------------------------------------//
    	//TFile *fout = new TFile("mc_sceoff.root","RECREATE");
-   	TFile *fout = new TFile("mc_sceoff_new.root","RECREATE");
+   	//TFile *fout = new TFile("mc_sceoff_new.root","RECREATE");
+   	//TFile *fout = new TFile("mc_sceoff_KEFit.root","RECREATE");
+   	TFile *fout = new TFile("mc_sceoff_KEconst.root","RECREATE");
 
 		h1d_trklen_CaloSz->Write();
 		h1d_endz_CaloSz->Write();
@@ -683,11 +731,25 @@ void ProtonOnlyTrackLength::Loop() {
 		h2d_trklen_dkeff_inel->Write();
 		h2d_trklen_dkeff_misidp->Write();
 
+/*
 		for (int k=0; k<n_eloss; ++k) {
 			h1d_KEend_hy_tune_bmrw[k]->Write();
 			h1d_KEend_hy_stop_tune_bmrw[k]->Write();
 			h1d_KEend_hy_el_tune_bmrw[k]->Write();
 		}
+*/
+
+		h1d_kend_calo_el->Write();
+		h1d_kend_calo_inel->Write();
+		
+		h1d_kend_bb_el->Write();
+		h1d_kend_bb_inel->Write();
+
+		h1d_kend_bbtruth_el->Write();
+		h1d_kend_bbtruth_inel->Write();
+
+		h1d_kend_true_el->Write();
+		h1d_kend_true_inel->Write();
 
 	fout->Close();
 
